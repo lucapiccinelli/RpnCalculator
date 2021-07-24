@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace RPNCalculator.Tests
+namespace RPNCalculator.Core
 {
     internal static class Expressions
     {
