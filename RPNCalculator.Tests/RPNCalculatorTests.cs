@@ -36,16 +36,7 @@ namespace RPNCalculator.Tests
                 .Split(" ")
                 .ToList());
 
-            ToExpressions(stack);
-
-            var operands = expressionStr
-                .Split(" ")
-                .Take(2)
-                .Select(IntRpn.Of)
-                .ToList();
-
-            string op = expressionStr.LastOrDefault().ToString();
-            var expression = GetBynaryOperator(op, operands);
+            IRpn expression = ToExpressions(stack);
             return expression.Evaluate();
         }
 
@@ -55,9 +46,9 @@ namespace RPNCalculator.Tests
             return element switch
             {
                 "+" => new Sum(ToExpressions(stack), ToExpressions(stack)),
-                "-" => new Subtraction(ToExpressions(stack), ToExpressions(stack)),
+                "-" => Subtraction.Invert(ToExpressions(stack), ToExpressions(stack)),
                 "*" => new Multiply(ToExpressions(stack), ToExpressions(stack)),
-                "/" => new Divide(ToExpressions(stack), ToExpressions(stack)),
+                "/" => Divide.Invert(ToExpressions(stack), ToExpressions(stack)),
                 _ => IntRpn.Of(element)
             };
         }
@@ -110,6 +101,8 @@ namespace RPNCalculator.Tests
         }
 
         public double Evaluate() => _operand1.Evaluate() / _operand2.Evaluate();
+
+        public static IRpn Invert(IRpn operand1, IRpn operand2) => new Divide(operand2, operand1);
     }
 
     public class Multiply : IRpn
@@ -138,6 +131,8 @@ namespace RPNCalculator.Tests
         }
 
         public double Evaluate() => _operand1.Evaluate() - _operand2.Evaluate();
+
+        public static IRpn Invert(IRpn operand1, IRpn operand2) => new Subtraction(operand2, operand1);
     }
 
     public class Sum : IRpn
