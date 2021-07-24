@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace RPNCalculator.Core
@@ -13,8 +14,21 @@ namespace RPNCalculator.Core
                 "-" => Subtraction.Invert(ToExpressions(stack), ToExpressions(stack)),
                 "*" => new Multiply(ToExpressions(stack), ToExpressions(stack)),
                 "/" => Divide.Invert(ToExpressions(stack), ToExpressions(stack)),
+                "SQRT" => new Sqrt(ToExpressions(stack)),
                 _ => IntRpn.Of(element)
             };
         }
+    }
+
+    public class Sqrt : IRpn
+    {
+        private readonly IRpn _expr;
+
+        public Sqrt(IRpn expr)
+        {
+            _expr = expr;
+        }
+
+        public double Evaluate() => Math.Sqrt(_expr.Evaluate());
     }
 }
