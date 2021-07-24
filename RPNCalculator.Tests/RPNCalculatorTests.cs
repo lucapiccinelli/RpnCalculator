@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -11,36 +12,20 @@ namespace RPNCalculator.Tests
         [InlineData("1 2 +", 3)]
         public void Test1(string expressionStr, double expectedValue)
         {
-            var expression = Rpn.Of(expressionStr);
-            double result = expression.Evaluate();
-
+            double result = Rpn.Evaluate(expressionStr);
             Assert.Equal(expectedValue, result);
         }
     }
 
     public static class Rpn
     {
-        public static RpnInt Of(string expression)
+        public static double Evaluate(string expressionStr)
         {
-            int result = expression
+            return expressionStr
                 .Split(" ")
                 .Take(2)
                 .Select(int.Parse)
                 .Sum();
-
-            return new RpnInt(result);
         }
-    }
-
-    public class RpnInt
-    {
-        private readonly int _value;
-
-        public RpnInt(int value)
-        {
-            _value = value;
-        }
-
-        public double Evaluate() => _value;
     }
 }
