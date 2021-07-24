@@ -15,6 +15,7 @@ namespace RPNCalculator.Tests
         [InlineData("5 3 -", 2)]
         [InlineData("4 3 *", 12)]
         [InlineData("8 2 /", 4)]
+        [InlineData("8 2 + 3 +", 13)]
         public void Test1(string expressionStr, double expectedValue)
         {
             double result = Rpn.Evaluate(expressionStr);
@@ -33,16 +34,94 @@ namespace RPNCalculator.Tests
             var operands = expressionStr
                 .Split(" ")
                 .Take(2)
-                .Select(int.Parse);
+                .Select(IntRpn.Of)
+                .ToList();
 
-            return op switch
+            IRpn expression = op switch
             {
-                '+' => operands.Aggregate((acc, n) => acc + n),
-                '-' => operands.Aggregate((acc, n) => acc - n),
-                '*' => operands.Aggregate((acc, n) => acc * n),
-                '/' => operands.Aggregate((acc, n) => acc / n),
-                _ => operands.FirstOrDefault()
+                '+' => new Sum(operands[0], operands[1]),
+                '-' => new Subtraction(operands[0], operands[1]),
+                '*' => new Multiply(operands[0], operands[1]),
+                '/' => new Divide(operands[0], operands[1]),
+                _ => operands.First()
             };
+
+            return expression.Evaluate();
         }
+    }
+
+    public class Divide : IRpn
+    {
+        private readonly IRpn _operand1;
+        private readonly IRpn _operand2;
+
+        public Divide(IRpn operand1, IRpn operand2)
+        {
+            _operand1 = operand1;
+            _operand2 = operand2;
+        }
+
+        public double Evaluate() => _operand1.Evaluate() / _operand2.Evaluate();
+    }
+
+    public class Multiply : IRpn
+    {
+        private readonly IRpn _operand1;
+        private readonly IRpn _operand2;
+
+        public Multiply(IRpn operand1, IRpn operand2)
+        {
+            _operand1 = operand1;
+            _operand2 = operand2;
+        }
+
+        public double Evaluate() => _operand1.Evaluate() * _operand2.Evaluate();
+    }
+
+    public class Subtraction : IRpn
+    {
+        private readonly IRpn _operand1;
+        private readonly IRpn _operand2;
+
+        public Subtraction(IRpn operand1, IRpn operand2)
+        {
+            _operand1 = operand1;
+            _operand2 = operand2;
+        }
+
+        public double Evaluate() => _operand1.Evaluate() - _operand2.Evaluate();
+    }
+
+    public class Sum : IRpn
+    {
+        private readonly IRpn _operand1;
+        private readonly IRpn _operand2;
+
+        public Sum(IRpn operand1, IRpn operand2)
+        {
+            _operand1 = operand1;
+            _operand2 = operand2;
+        }
+
+        public double Evaluate() => _operand1.Evaluate() + _operand2.Evaluate();
+    }
+
+    public interface IRpn
+    {
+        double Evaluate();
+    }
+
+    public class IntRpn : IRpn
+    {
+        private readonly int _value;
+
+        private IntRpn(int value)
+        {
+            _value = value;
+        }
+
+        public static IntRpn Of(string value) => new IntRpn(int.Parse(value));
+
+        public double Evaluate() => _value;
     }
 }
