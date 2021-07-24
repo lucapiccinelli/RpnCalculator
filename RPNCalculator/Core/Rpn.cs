@@ -8,11 +8,12 @@ namespace RPNCalculator.Core
         public static double Evaluate(string expressionStr)
         {
             if (string.IsNullOrEmpty(expressionStr)) return 0;
-            var stack = new Stack<string>(expressionStr
+            var stack = new Stack<IRpnElement>(expressionStr
                 .Split(" ")
+                .Select(RpnElement.Of)
                 .ToList());
 
-            IRpn expression = Expressions.ToExpressions(stack);
+            IRpn expression = new StackExpressions(stack).ToExpressions();
             return expression.Evaluate();
         }
     }
