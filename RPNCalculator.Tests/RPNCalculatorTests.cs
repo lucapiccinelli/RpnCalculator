@@ -19,6 +19,9 @@ namespace RPNCalculator.Tests
         [InlineData("8 2 /", 4)]
         [InlineData("8 2 + 3 +", 13)]
         [InlineData("4 2 + 3 -", 3)]
+        [InlineData("5 8 * 7 +", 47)]
+        [InlineData("5 8 * 7 + 3 *", 141)]
+        [InlineData("3 5 8 * 7 + *", 141)]
         public void Test1(string expressionStr, double expectedValue)
         {
             double result = Rpn.Evaluate(expressionStr);
