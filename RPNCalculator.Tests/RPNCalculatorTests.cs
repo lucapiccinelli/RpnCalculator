@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -29,7 +31,12 @@ namespace RPNCalculator.Tests
         {
             if (string.IsNullOrEmpty(expressionStr)) return 0;
 
-            char op = expressionStr.LastOrDefault();
+
+            var stack = new Stack<string>(expressionStr
+                .Split(" ")
+                .ToList());
+
+            ToExpressions(stack);
 
             var operands = expressionStr
                 .Split(" ")
@@ -37,17 +44,58 @@ namespace RPNCalculator.Tests
                 .Select(IntRpn.Of)
                 .ToList();
 
-            IRpn expression = op switch
-            {
-                '+' => new Sum(operands[0], operands[1]),
-                '-' => new Subtraction(operands[0], operands[1]),
-                '*' => new Multiply(operands[0], operands[1]),
-                '/' => new Divide(operands[0], operands[1]),
-                _ => operands.First()
-            };
-
+            string op = expressionStr.LastOrDefault().ToString();
+            var expression = GetBynaryOperator(op, operands);
             return expression.Evaluate();
         }
+
+        private static IRpn ToExpressions(Stack<string> stack)
+        {
+            string element = stack.Pop();
+            return element switch
+            {
+                "+" => new Sum(ToExpressions(stack), ToExpressions(stack)),
+                "-" => new Subtraction(ToExpressions(stack), ToExpressions(stack)),
+                "*" => new Multiply(ToExpressions(stack), ToExpressions(stack)),
+                "/" => new Divide(ToExpressions(stack), ToExpressions(stack)),
+                _ => IntRpn.Of(element)
+            };
+        }
+
+        private static IRpn GetBynaryOperator(string op, List<IntRpn> operands)
+        {
+            IRpn expression = op switch
+            {
+                "+" => new Sum(operands[0], operands[1]),
+                "-" => new Subtraction(operands[0], operands[1]),
+                "*" => new Multiply(operands[0], operands[1]),
+                "/" => new Divide(operands[0], operands[1]),
+                _ => operands[0]
+            };
+            return expression;
+        }
+
+        private static IOperand Operand(string value)
+        {
+            char c = value.First();
+            if (char.IsDigit(c)) return IntRpn.Of(value);
+            return new OperatorFactory(c);
+        }
+    }
+
+    internal class OperatorFactory : IOperand
+    {
+        private readonly char _c;
+
+        public OperatorFactory(in char c)
+        {
+            _c = c;
+        }
+    }
+
+    interface IOperand
+    {
+        
     }
 
     public class Divide : IRpn
@@ -111,11 +159,11 @@ namespace RPNCalculator.Tests
         double Evaluate();
     }
 
-    public class IntRpn : IRpn
+    public class IntRpn : IRpn, IOperand
     {
         private readonly int _value;
 
-        private IntRpn(int value)
+        public IntRpn(int value)
         {
             _value = value;
         }
