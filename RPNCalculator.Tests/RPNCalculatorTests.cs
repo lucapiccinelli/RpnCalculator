@@ -26,6 +26,9 @@ namespace RPNCalculator.Tests
         [InlineData("9 SQRT 4 5 + +", 12)]
         [InlineData("4 5 9 SQRT + +", 12)]
         [InlineData("4 9 SQRT +", 7)]
+        [InlineData("4 9 1 MAX", 9)]
+        [InlineData("4 9 1 12 MAX", 12)]
+        [InlineData("4 5 MAX 1 2 MAX *", 10)]
         public void Test1(string expressionStr, double expectedValue)
         {
             double result = Rpn.Evaluate(expressionStr);

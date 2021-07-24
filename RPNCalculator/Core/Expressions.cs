@@ -15,8 +15,28 @@ namespace RPNCalculator.Core
                 "*" => new Multiply(ToExpressions(stack), ToExpressions(stack)),
                 "/" => Divide.Invert(ToExpressions(stack), ToExpressions(stack)),
                 "SQRT" => new Sqrt(ToExpressions(stack)),
+                "MAX" => new Max(ToExpressions(stack), stack),
                 _ => IntRpn.Of(element)
             };
+        }
+    }
+
+    class Max : IRpn
+    {
+        private readonly IRpn _operand1;
+        private readonly IRpn _operand2;
+
+        public Max(IRpn operand1, Stack<string> stack)
+        {
+            _operand1 = operand1;
+            _operand2 = stack.Count == 0 || stack.Peek() == "MAX"
+                ? (IRpn) new IntRpn(0) 
+                : new Max(Expressions.ToExpressions(stack), stack);
+        }
+
+        public double Evaluate()
+        {
+            return Math.Max(_operand1.Evaluate(), _operand2.Evaluate());
         }
     }
 
