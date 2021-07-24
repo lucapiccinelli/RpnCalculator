@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace RPNCalculator.Tests
@@ -21,7 +22,13 @@ namespace RPNCalculator.Tests
     {
         public static RpnInt Of(string expression)
         {
-            return new RpnInt(int.Parse(expression));
+            int result = expression
+                .Split(" ")
+                .Take(2)
+                .Select(int.Parse)
+                .Sum();
+
+            return new RpnInt(result);
         }
     }
 
