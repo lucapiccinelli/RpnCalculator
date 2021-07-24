@@ -7,7 +7,7 @@ using Xunit;
 
 namespace RPNCalculator.Tests
 {
-    public class RPNCalculatorTests
+    public class RpnCalculatorTests
     {
         [Theory]
         [InlineData("", 0)]
@@ -18,6 +18,7 @@ namespace RPNCalculator.Tests
         [InlineData("4 3 *", 12)]
         [InlineData("8 2 /", 4)]
         [InlineData("8 2 + 3 +", 13)]
+        [InlineData("4 2 + 3 -", 3)]
         public void Test1(string expressionStr, double expectedValue)
         {
             double result = Rpn.Evaluate(expressionStr);
@@ -30,63 +31,13 @@ namespace RPNCalculator.Tests
         public static double Evaluate(string expressionStr)
         {
             if (string.IsNullOrEmpty(expressionStr)) return 0;
-
-
             var stack = new Stack<string>(expressionStr
                 .Split(" ")
                 .ToList());
 
-            IRpn expression = ToExpressions(stack);
+            IRpn expression = Expressions.ToExpressions(stack);
             return expression.Evaluate();
         }
-
-        private static IRpn ToExpressions(Stack<string> stack)
-        {
-            string element = stack.Pop();
-            return element switch
-            {
-                "+" => new Sum(ToExpressions(stack), ToExpressions(stack)),
-                "-" => Subtraction.Invert(ToExpressions(stack), ToExpressions(stack)),
-                "*" => new Multiply(ToExpressions(stack), ToExpressions(stack)),
-                "/" => Divide.Invert(ToExpressions(stack), ToExpressions(stack)),
-                _ => IntRpn.Of(element)
-            };
-        }
-
-        private static IRpn GetBynaryOperator(string op, List<IntRpn> operands)
-        {
-            IRpn expression = op switch
-            {
-                "+" => new Sum(operands[0], operands[1]),
-                "-" => new Subtraction(operands[0], operands[1]),
-                "*" => new Multiply(operands[0], operands[1]),
-                "/" => new Divide(operands[0], operands[1]),
-                _ => operands[0]
-            };
-            return expression;
-        }
-
-        private static IOperand Operand(string value)
-        {
-            char c = value.First();
-            if (char.IsDigit(c)) return IntRpn.Of(value);
-            return new OperatorFactory(c);
-        }
-    }
-
-    internal class OperatorFactory : IOperand
-    {
-        private readonly char _c;
-
-        public OperatorFactory(in char c)
-        {
-            _c = c;
-        }
-    }
-
-    interface IOperand
-    {
-        
     }
 
     public class Divide : IRpn
@@ -154,7 +105,7 @@ namespace RPNCalculator.Tests
         double Evaluate();
     }
 
-    public class IntRpn : IRpn, IOperand
+    public class IntRpn : IRpn
     {
         private readonly int _value;
 
