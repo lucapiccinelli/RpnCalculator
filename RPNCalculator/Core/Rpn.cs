@@ -10,8 +10,7 @@ namespace RPNCalculator.Core
             if (string.IsNullOrEmpty(expressionStr)) return 0;
             var stack = new Stack<IRpnElement>(expressionStr
                 .Split(" ")
-                .Select(RpnElement.Of)
-                .ToList());
+                .Select(RpnElement.Of));
 
             IRpn expression = new StackExpressions(stack).ToExpressions();
             return expression.Evaluate();
